@@ -1,0 +1,164 @@
+*, *::before, *::after {
+  padding: 0;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 0.83vw;
+}
+
+body {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  background-image: linear-gradient(#100, #001);
+  perspective: 60em;
+  overflow: hidden;
+
+  *:not(:empty) {
+    transform-style: preserve-3d;
+  }
+}
+
+$speed: 120s;
+$cubeCount: 17;
+$panelCount: 20;
+
+.scene {
+  position: relative;
+  animation: sceneRotate $speed infinite linear;
+
+  @keyframes sceneRotate {
+    from { transform: rotateX(-15deg) rotateY(0deg); }
+    to   { transform: rotateX(-15deg) rotateY(-360deg); }
+  }
+
+  & * {
+    position: absolute;
+  }
+}
+
+.cube_arm {
+  bottom: -6em;
+  width: 48em; height: 2px;
+  animation:
+    ballArmT $speed var(--delay, 0s) infinite ease-in-out,
+    ballArmS $speed/$panelCount var(--delay, 0s) infinite;
+  transform-origin: bottom left;
+
+  @keyframes ballArmT {
+    @for $i from 0 through $panelCount {
+      #{100% / $panelCount * $i} { transform: rotateY(#{$i * (180 - 360 / $panelCount)}deg); }
+    }
+  }
+
+  @keyframes ballArmS {
+    0%, 100%   { width: 24em; height: 0; animation-timing-function: ease-out; }
+    50%   { width: 9.3em; height: 24em; animation-timing-function: ease-in; }
+  }
+
+  @for $i from 0 to $cubeCount {
+    &:nth-child(#{$i + 1}) {
+      --delay: #{$speed / $cubeCount * $i * -1};
+      --hue: #{360 / $cubeCount * $i};
+    }
+  }
+}
+
+.cube {
+  left: 100%; top: 0;
+  animation: cube #{$speed / $panelCount} var(--delay, 0s) infinite ease-in-out;
+
+  @keyframes cube {
+    from { transform: rotateX(0deg) rotateY(0deg) rotateZ(-15deg);}
+    to { transform: rotateX(360deg) rotateY(720deg) rotateZ(-15deg);}
+  }
+
+  & > div {
+    left: -1em; top: -1em;
+    width: 2em; height: 2em;
+    background-color: hsla(var(--hue, 0), 80%, 70%, 0.5);
+    background-image: repeating-linear-gradient(45deg, #fff1 0 3px, #fff0 0 6px);
+    box-shadow: 0 0 1em #0007 inset;
+
+    @for $i from 0 to 4 {
+      &:nth-child(#{$i + 1}) {
+        transform: rotateY(#{90 * $i}deg) translateZ(1em);
+      }
+    }
+    @for $i from 0 to 2 {
+      &:nth-child(#{$i + 5}) {
+        transform: rotateX(#{90 + 180 * $i}deg) translateZ(1em);
+      }
+    }
+  }
+}
+
+.panel {
+  left: -4em; top: 4em;
+  width: 8em; height: 6em;
+  border-radius: 3em;
+  background-image:
+    repeating-linear-gradient(45deg, #fff2 0 3px, #fff0 0 6px),
+    radial-gradient(#0000, #0005);
+  transform: rotateX(90deg) rotateZ(var(--panelAngle, 0deg)) translateX(24em) rotateY(-15deg);
+  animation:
+    panelT #{$speed / $cubeCount} var(--delay, 0s) infinite linear,
+    panelHue $speed var(--delay, 0s) infinite step-end;
+
+  @keyframes panelT {
+    0%   { transform: rotateX(90deg) rotateZ(var(--panelAngle)) rotateY(0deg) translateX(24.3em) rotateY(-15deg) translateZ(0em); animation-timing-function: ease-out; }
+    8%   { transform: rotateX(90deg) rotateZ(var(--panelAngle)) rotateY(0deg) translateX(23.8em) rotateY(-15deg) translateZ(2em); animation-timing-function: ease-in-out; }
+    48%  { transform: rotateX(90deg) rotateZ(var(--panelAngle)) rotateY(10deg) translateX(23.8em) rotateY(-15deg) translateZ(0em); }
+    58%  { transform: rotateX(90deg) rotateZ(var(--panelAngle)) rotateY(10deg) translateX(23.8em) rotateY(-15deg) rotateZ(-180deg) translateZ(0em); }
+    98.1%  { transform: rotateX(90deg) rotateZ(var(--panelAngle)) rotateY(0deg) translateX(23.8em) rotateY(-15deg) rotateZ(-180deg) translateZ(2em); animation-timing-function: linear; }
+    100% { transform: rotateX(90deg) rotateZ(var(--panelAngle)) rotateY(0deg) translateX(24.3em) rotateY(-15deg) rotateZ(-180deg) translateZ(0em); }
+
+    0% { background-color: hsl(var(--hue, 0), 40%, 70%); animation-timing-function: ease-out; }
+    50%, 100% { background-color: hsl(var(--hue, 0), 0%, 70%); }
+  }
+
+  @keyframes panelHue {
+    @for $i from 0 through $cubeCount {
+      #{100% / $cubeCount * $i} { --hue:  #{360 / $cubeCount * $i * -1}; }
+    }
+  }
+
+  @for $i from 0 to $panelCount {
+    &:nth-child(#{$i + 1}) {
+      --panelAngle: #{360deg / $panelCount * $i};
+      --delay: #{($speed / $cubeCount) / $panelCount * $i * -153};
+    }
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: 100%; height: 100%;
+    background-image: radial-gradient(#000, #0000 67%);
+    animation: panelShadow #{$speed / $cubeCount} var(--delay, 0s) infinite linear;
+
+    @keyframes panelShadow {
+      0%, 98%, 100% { opacity: 0.5; animation-timing-function: ease-out; }
+      10%, 95%  { opacity: 0; animation-timing-function: ease-out; }
+    }
+  }
+
+  & > i {
+    left: 0; top: 0; 
+    width: 100%; height: 100%;
+    background-color: inherit;
+    border-radius: inherit;
+    transform: translateZ(var(--tz));
+    background-image:
+      repeating-linear-gradient(45deg, #fff2 0 3px, #fff0 0 6px),
+      radial-gradient(#0005, #000a);
+
+    @for $i from 0 to 5 {
+      &:nth-child(#{$i + 1}) {
+        --tz: #{($i + 1) * -2px};
+      }
+    }
+  }
+}

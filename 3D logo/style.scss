@@ -1,0 +1,110 @@
+*,
+*::before,
+*::after {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+$cubeSize: 320px;
+$cubeBarSize: 32px;
+$speed: 16s;
+body {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  background-image: radial-gradient(circle, rgba(0, 0, 255, 0.795), #000 $cubeSize * 3);
+  *:not(:empty) {
+    transform-style: preserve-3d;
+  }
+}
+.logo {
+  position: relative;
+  
+  animation: rotateLogo $speed infinite ease-in-out;
+
+  @keyframes rotateLogo {
+    0%,
+    10% {
+      transform: scaleY(0.8) rotateX(-55deg) rotateY(45deg);
+    }
+    100% {
+      transform: scaleY(0.8) rotateX(305deg) rotateY(765deg);
+    }
+  }
+}
+.side {
+    
+  position: absolute;
+  width: $cubeSize;
+  height: $cubeSize;
+
+  &:nth-child(1) {
+    transform: translate(-50%, -50%) translateZ($cubeSize * 0.5);
+   
+  }
+  &:nth-child(2) {
+    transform: translate(-50%, -50%) rotateY(90deg) translateZ($cubeSize * 0.5);
+    
+  }
+  &:nth-child(3) {
+    transform: translate(-50%, -50%) rotateY(180deg) translateZ($cubeSize * 0.5);
+  }
+  &:nth-child(4) {
+    transform: translate(-50%, -50%) rotateY(270deg) translateZ($cubeSize * 0.5);
+  }
+  &:nth-child(5) {
+    transform: translate(-50%, -50%) rotateY(90deg) translateZ($cubeSize * 0.5);
+  }
+  &:nth-child(6) {
+    transform: translate(-50%, -50%) rotateY(270deg) translateZ($cubeSize * 0.5);
+  }
+  & > div {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    background-color: rgb(255, 0, 255);
+    transform-origin: top left;
+    animation: sideShadow $speed infinite ease-in-out;
+
+    @keyframes sideShadow {
+      0%,
+      10%,
+      100% {
+        box-shadow: 0 0 #0000 ($cubeBarSize * 0.5) inset;
+      }
+      15%,
+      90% {
+        box-shadow: 0 0 #0005 ($cubeBarSize *0.5) inset;
+      }
+    }
+    &:nth-child(n + 1):nth-child(-n + 4) {
+      width: $cubeSize;
+      height: $cubeBarSize;
+      border: aquamarine;
+      clip-path: polygon(
+        0 0,
+        100% 0,
+        calc(100% - #{$cubeBarSize}) 100%,
+        #{$cubeBarSize} 100%
+      );
+      transform: rotateZ(var(--rz))
+        translate(-#{$cubeSize * 0.5}, -#{$cubeSize * 0.5});
+    }
+
+    &:nth-child(n + 5):nth-child(-n + 8) {
+      width: #{$cubeSize - ($cubeBarSize * 2)};
+      height: $cubeBarSize;
+      transform: rotateZ(var(--rz))
+        translate(
+          -#{$cubeSize * 0.5- $cubeBarSize}, -#{$cubeSize * 0.5 - $cubeBarSize}
+        )
+        rotateX(-90deg);
+    }
+    $count: 4;
+    @for $i from 0 to $count {
+      &:nth-child(4n + #{$i + 1}) {
+        --rz: #{90deg * $i};
+      }
+    }
+  }
+}
